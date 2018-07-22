@@ -218,7 +218,7 @@ void setup()
   welcome_screen();
   delay(2000);
   //while(1);
-  Serial.begin(9600);
+  //Serial.begin(9600);
   //timer[1].state=ENABLE;
 }
 void loop()
