@@ -199,7 +199,7 @@ void set_timer_parameter(int8_t choosing)
       }
       case ENTER:
       {
-        Serial.println(parameter);
+        //Serial.println(parameter);
         if(parameter==(size_of_timer_def)) 
         {
           timer[choosing].begin_hour=parameter_of_timer[0];
