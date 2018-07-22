@@ -1,3 +1,5 @@
+//i don't know how it works, it just works
+// i'm not responsible for any damage caused by this timer not working properly
 #include "main_header.h"
 RTC_DS3231 rtc;
 Adafruit_SSD1306 display= Adafruit_SSD1306(4);
