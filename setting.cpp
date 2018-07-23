@@ -11,6 +11,8 @@ void display_setting_screen(int8_t setting)
   display.setCursor(8,28);
   display.print(F("Timer Setting"));
   display.setCursor(8,37);
+  display.print(F("Reset all timers"));
+  display.setCursor(8,46);
   display.print(F("Return main screen"));
   display.setCursor(0,19+setting*9);
   display.print(F(">"));
@@ -90,8 +92,8 @@ void change_current_time()
       {
         if(is_changing_time==0)
         {
-        setting_time++;
-        if(setting_time>=MAX_SETTING_TIME_SCREEN) setting_time=0;
+        setting_time--;
+        if(setting_time<0) setting_time=MAX_SETTING_TIME_SCREEN-1;
         }
         else
         {
@@ -106,8 +108,8 @@ void change_current_time()
       {
         if(is_changing_time==0)
         {
-        setting_time--;
-        if(setting_time<0) setting_time=MAX_SETTING_TIME_SCREEN-1;
+        setting_time++;
+        if(setting_time>=MAX_SETTING_TIME_SCREEN) setting_time=0;
         }
         else
         {
@@ -230,8 +232,8 @@ void set_timer_parameter(int8_t choosing)
         if(is_changing) parameter_of_timer[parameter]++;
         else
         {
-        parameter++;
-        if(parameter>=size_of_timer_def+2) parameter=0;
+        parameter--;
+        if(parameter<0) parameter=size_of_timer_def+1;
         }
         last_minute=minute;
         last_second=second;
@@ -243,8 +245,8 @@ void set_timer_parameter(int8_t choosing)
         if(is_changing) parameter_of_timer[parameter]--;
         else
         {
-        parameter--;
-        if(parameter<0) parameter=size_of_timer_def+1;
+        parameter++;
+        if(parameter>=size_of_timer_def+2) parameter=0;
         }
         last_minute=minute;
         last_second=second;
@@ -341,6 +343,68 @@ void timer_setting()
     }
   }
 }
+void reset_timer()
+{
+  for(int i=0;i<(size_of_timer_def*NUMBER_OF_TIMER);i++)
+  {
+    EEPROM.write(i,0);
+  }
+  read_data_from_EEPROM();
+}
+void reset_all_timer()
+{
+  int8_t hour=0,minute=0,second=0;
+  get_current_time(&hour,&minute,&second);
+  int8_t last_hour=hour, last_minute=minute,last_second=second;
+  interrupt_event=NO_EVENT;
+  boolean selection=0;
+  while(1)
+  {
+  get_current_time(&hour,&minute,&second);
+  if(can_go_to_sleep(minute,second,last_minute,last_second)) return;
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setCursor(0,0);
+  display.print(F("Are you sure?"));
+  display.setCursor(8,8);
+  display.print(F("NO"));
+  display.setCursor(8,20);
+  display.print(F("YES"));
+  if(selection==0) display.setCursor(0,8);
+  else display.setCursor(0,20);
+  display.print(F(">"));
+  display.display();
+  switch(interrupt_event)
+  {
+    case ENTER:
+    {
+       interrupt_event=NO_EVENT;
+      if(selection==1) 
+      {
+        reset_timer();
+        return;
+      }
+      else return;
+    }
+    case UP:
+    {
+      interrupt_event=NO_EVENT;
+      selection=!selection;
+      last_minute=minute;
+      last_second=second;
+      break;
+    }
+    case DOWN:
+    {
+      interrupt_event=NO_EVENT;
+      selection=!selection;
+      last_minute=minute;
+      last_second=second;
+      break;
+    }
+  }
+  }
+}
 void setting()
 {
   interrupt_event=NO_EVENT;
@@ -354,7 +418,7 @@ void setting()
     get_current_time(&hour,&minute,&second);
     switch(interrupt_event)
     {
-      case UP:
+      case DOWN:
       {
         setting_mode++;
         if(setting_mode>=MAX_SETTING_SCREEN) setting_mode=0;
@@ -363,7 +427,7 @@ void setting()
         last_second=second;
         break;
       }
-      case DOWN:
+      case UP:
       {
         setting_mode--;
         if(setting_mode<0) setting_mode=MAX_SETTING_SCREEN-1;
@@ -379,6 +443,7 @@ void setting()
           case 0:
           {
             change_current_time();
+            get_current_time(&hour,&minute,&second);
             last_minute=minute;
             last_second=second;
             break;
@@ -386,11 +451,20 @@ void setting()
           case 1:
           {
             timer_setting();
+            get_current_time(&hour,&minute,&second);
             last_minute=minute;
             last_second=second;
             break;
           }
           case 2:
+          {
+            reset_all_timer();
+            get_current_time(&hour,&minute,&second);
+            last_minute=minute;
+            last_second=second;
+            break;
+          }
+          case 3:
           {
             return;
             break;

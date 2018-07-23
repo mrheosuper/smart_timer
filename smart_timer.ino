@@ -1,5 +1,3 @@
-//i don't know how it works, it just works
-// i'm not responsible for any damage caused by this timer not working properly
 #include "main_header.h"
 RTC_DS3231 rtc;
 Adafruit_SSD1306 display= Adafruit_SSD1306(4);
@@ -38,12 +36,12 @@ int8_t timer_satisfied(uint8_t hour, uint8_t minute,timer_def timer)
   int32_t delta_minute=timer.stop_minute-timer.begin_minute;
   if(delta_hour+delta_minute>=0)
   {
-  if(hour<=timer.stop_hour&&hour>=timer.begin_hour&&minute<=timer.stop_minute&&minute>=timer.begin_minute) return 1;
+  if(hour>=timer.begin_hour&&minute>=timer.begin_minute&&((hour==timer.stop_hour&&minute<timer.stop_minute)||(hour<timer.stop_hour))) return 1;
   else return 0;
   }
   else
   {
-    if((hour>=timer.begin_hour&&minute>=timer.begin_minute)||(hour<=timer.stop_hour&&minute<=timer.stop_minute)) return 1;
+    if((hour>=timer.begin_hour&&minute>=timer.begin_minute)||((hour==timer.stop_hour&&minute<timer.stop_minute)||(hour<timer.stop_hour))) return 1;
     else return 0;
   }
 }
@@ -219,9 +217,7 @@ void setup()
   read_data_from_EEPROM();
   welcome_screen();
   delay(2000);
-  //while(1);
   //Serial.begin(9600);
-  //timer[1].state=ENABLE;
 }
 void loop()
 {
@@ -245,6 +241,7 @@ void loop()
         {
           main_screen=0;
           is_sleeping=0;
+          get_current_time(&hour,&minute,&second);
           last_second=second;                               //After sleeping we want to display home screen
           last_minute=minute;
           interrupt_event=0;
@@ -253,6 +250,7 @@ void loop()
         {
         main_screen++;
         if(main_screen>=MAX_MAIN_SCREEN) main_screen=0;
+        get_current_time(&hour,&minute,&second);
         last_second=second;
         last_minute=minute;
         interrupt_event=0;
@@ -266,6 +264,7 @@ void loop()
         {
           main_screen=0;
           is_sleeping=0;
+          get_current_time(&hour,&minute,&second);
           last_second=second;                           //Same reason
           last_minute=minute;
           interrupt_event=0;
@@ -274,6 +273,7 @@ void loop()
         {
         main_screen--;
         if(main_screen<0) main_screen=MAX_MAIN_SCREEN-1;
+        get_current_time(&hour,&minute,&second);
         last_second=second;
         last_minute=minute;
         interrupt_event=0;
@@ -294,6 +294,7 @@ void loop()
         else
         {
         setting();
+        get_current_time(&hour,&minute,&second);
         interrupt_event=0;//NO_EVENT
         last_second=second;
         last_minute=minute;

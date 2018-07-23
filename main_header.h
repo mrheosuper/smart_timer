@@ -15,7 +15,7 @@
 #define up_pin 5
 #define go_to_sleep_time 20
 #define MAX_MAIN_SCREEN 4
-#define MAX_SETTING_SCREEN 3
+#define MAX_SETTING_SCREEN 4
 #define MAX_SETTING_TIME_SCREEN 5
 #define INTERRUPT_INTERVAL 200
 #define size_of_timer_def 6
@@ -44,5 +44,6 @@ extern void get_current_time(uint8_t * hour, uint8_t * minute, uint8_t * second)
 void setting();
 extern int8_t can_go_to_sleep(uint8_t minute, uint8_t second, uint8_t last_minute, uint8_t last_second);
 extern void write_data_to_EEPROM();
+extern void read_data_from_EEPROM();
 //int freeMemory();
 #endif
